@@ -1,13 +1,16 @@
 <?php
 
 use App\Http\Controllers\Api\GenderController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 
-Route::Controller(GenderController::class)->group(function() {
-    Route::post('/storeGender', 'storeGender');
+
+Route::controller(GenderController::class)->group(function () {
+    Route::post('storeGender', 'storeGender');
+    Route::post('storeGender', 'storeGender');
 });
 
-// Route::get('/user', function (Request $request) {
+// If you want to keep the user route, uncomment this block:
+// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 //     return $request->user();
-// })->middleware('auth:sanctum');
+// });

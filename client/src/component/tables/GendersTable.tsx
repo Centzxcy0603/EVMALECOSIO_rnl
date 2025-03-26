@@ -1,51 +1,77 @@
-const GendersTable = () => {
+import { useEffect, useState } from "react";
+import Genders from "../../interfaces/Genders";
+import GenderServices from "../../services/GenderService";
+import ErrorHandler from "../../handler/ErrorHandler";
+import Spinner from "../Spinner";
+
+interface GendersTableProps {
+    refreshGenders: boolean; // Ensure prop name is consistent
+}
+
+const GendersTable = ({ refreshGenders }: GendersTableProps) => {
+    const [state, setState] = useState({
+        loadingGenders: true,
+        genders: [] as Genders[],
+    });
+
+    const handleLoadGenders = () => {
+        GenderServices.loadGenders()
+            .then((res) => {
+                if (res.status === 200) {
+                    setState({
+                        loadingGenders: false,
+                        genders: res.data.genders,
+                    });
+                } else {
+                    console.error("Unexpected status error during loading genders", res.status);
+                }
+            })
+            .catch((error) => {
+                ErrorHandler(error, null);
+                setState((prevState) => ({ ...prevState, loadingGenders: false }));
+            });
+    };
+
+    // Load genders on mount and when refreshGenders updates
+    useEffect(() => {
+        handleLoadGenders();
+    }, [refreshGenders]);
+
     return (
         <>
             <table className="table table-hover">
                 <thead>
-                    <tr>
+                    <tr className="align-middle">
                         <th>No.</th>
                         <th>Gender</th>
-                        <th className="actions-column">Actions</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {[
-                        { id: 1, gender: "Male" },
-                        { id: 2, gender: "Female" },
-                        { id: 3, gender: "Others" },
-                    ].map((item) => (
-                        <tr key={item.id}>
-                            <td>{item.id}</td>
-                            <td>{item.gender}</td>
-                            <td>
-                                <div className="d-flex justify-content-center gap-2">
-                                    <button
-                                        className="btn btn-primary btn-sm"
-                                        style={{
-                                            padding: "10px 15px",
-                                            fontSize: "12px",
-                                            color: "white",
-                                            borderColor: "green",
-                                        }}
-                                    >
-                                        Edit
-                                    </button>
-                                    <button
-                                        className="btn btn-danger btn-sm"
-                                        style={{
-                                            padding: "10px 15px",
-                                            fontSize: "12px",
-                                            color: "white",
-                                            borderColor: "red",
-                                        }}
-                                    >
-                                        Delete
-                                    </button>
-                                </div>
+                    {state.loadingGenders ? (
+                        <tr className="align-middle">
+                            <td colSpan={3} className="text-center">
+                                <Spinner />
                             </td>
                         </tr>
-                    ))}
+                    ) : (
+                        state.genders.map((gender, index) => (
+                            <tr className="align-middle" key={index}>
+                                <td>{index + 1}</td>
+                                <td>{gender.gender}</td>
+                                <td>
+                                    <div className="btn-group">
+                                        <button type="button" className="btn btn-success">
+                                            Edit
+                                        </button>
+                                        <button type="button" className="btn btn-danger">
+                                            Delete
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))
+                    )}
                 </tbody>
             </table>
         </>
